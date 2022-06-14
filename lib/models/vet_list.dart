@@ -25,25 +25,27 @@ class VetList with ChangeNotifier {
       telefone: data['telefone'] as String,
       email: data['email'] as String,
       imagem: data['imagem'] as String,
+      especializacao: data['especializacao'] as String
     );
 
     if (hasId) {
       return updatePet(vet);
     } else {
-      return addPet(vet);
+      return addVet(vet);
     }
   }
 
-  Future<void> addPet(Vet vet) {
+  Future<void> addVet(Vet vet) {
     final future = http.post(Uri.parse('$_baseUrl/veterinarios.json'),
         body: jsonEncode({
           "nome": vet.nome,
           "telefone": vet.telefone,
           "email": vet.email,
           "imagem": vet.imagem,
+          "especializacao": vet.especializacao
         }));
     return future.then((response) {
-      final id = jsonDecode(response.body)['nome'];
+      final id = jsonDecode(response.body)['name'];
 
       _vets.add(Vet(
           id: id,
@@ -51,6 +53,7 @@ class VetList with ChangeNotifier {
           telefone: vet.telefone,
           email: vet.email,
           imagem: vet.imagem,
+          especializacao: vet.especializacao
       ));
       notifyListeners();
     });
@@ -63,6 +66,7 @@ class VetList with ChangeNotifier {
           "telefone": vet.telefone,
           "email": vet.email,
           "imagem": vet.imagem,
+          "especializacao": vet.especializacao
         })
     );
     return future.then((response) {
@@ -70,6 +74,18 @@ class VetList with ChangeNotifier {
       if (index >= 0) {
       _vets[index] = vet;
       notifyListeners();
+      }
+    });
+  }
+
+  Future<void> removeVet(Vet vet) {
+    final future = http.delete(Uri.parse('$_baseUrl/veterinarios/${vet.id}.json'));
+    int index = _vets.indexWhere((p) => p.id == vet.id);
+
+    return future.then((response) {
+      if (index >= 0) {
+        _vets.removeWhere((p) => p.id == vet.id);
+        notifyListeners();
       }
     });
   }

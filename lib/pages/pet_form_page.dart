@@ -199,25 +199,24 @@ class _PetFormPageState extends State<PetFormPage> {
                       ),
                     ],
               ),
+
               TextFormField(
                 initialValue: _formData['idade']?.toString(),
-                decoration: InputDecoration(labelText: 'Idade'),
-                textInputAction: TextInputAction.next,
-                focusNode: _idadeFocus,
+                decoration: InputDecoration(
+                  labelText: 'Idade',
+                ),
                 keyboardType: TextInputType.numberWithOptions(
                   decimal: true,
                 ),
+                textInputAction: TextInputAction.next,
                 onFieldSubmitted: (_) {
                   FocusScope.of(context).requestFocus(_especieFocus);
                 },
-                onSaved: (idade) =>
-                    _formData['idade'] = double.parse(idade ?? '0'),
+                onSaved: (idade) => _formData['idade'] = idade ?? '',
                 validator: (_idade) {
-                  final idadeString = _idade ?? '';
-                  final idade = double.tryParse(idadeString) ?? -1;
-
-                  if (idade <= 0) {
-                    return 'Informe uma idade válida.';
+                  final idade = _idade ?? '';
+                  if (idade.trim().isEmpty) {
+                    return 'Idade é obrigatória';
                   }
                   return null;
                 },

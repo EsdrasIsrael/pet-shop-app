@@ -5,9 +5,14 @@ import 'package:pet_shop_app/models/vet_list.dart';
 import 'package:pet_shop_app/utils/app_routes.dart';
 import 'package:provider/provider.dart';
 
-class VetManagementPage extends StatelessWidget {
+class VetManagementPage extends StatefulWidget {
   const VetManagementPage({ Key? key }) : super(key: key);
 
+  @override
+  State<VetManagementPage> createState() => _VetManagementPageState();
+}
+
+class _VetManagementPageState extends State<VetManagementPage> {
   @override
   Widget build(BuildContext context) {
 

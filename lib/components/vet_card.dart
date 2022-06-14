@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pet_shop_app/models/vet.dart';
+import 'package:pet_shop_app/models/vet_list.dart';
+import 'package:pet_shop_app/utils/app_routes.dart';
 import 'package:provider/provider.dart';
 
 class VetCard extends StatelessWidget {
@@ -14,15 +16,19 @@ class VetCard extends StatelessWidget {
     );
 
     return InkWell(
-      onTap: () => {},
+      onTap: () => {
+        Navigator.of(context).pushNamed(
+          AppRoutes.VET_DETAIL,
+            arguments: vet,
+        )
+      },
       child: Padding(
-        padding: const EdgeInsets.all(8.0),
+        padding: const EdgeInsets.all(16.0),
         child: Card(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
           elevation: 4,
-          margin: const EdgeInsets.all(8.0),
           child: Container(
-            height: 140,
+            height: 170,
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -31,22 +37,23 @@ class VetCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(16.0),
                   child: Image.network(
                         vet.imagem,
-                        height: 140,
-                        width: 140,
+                        height: 170,
+                        width: 150,
                         fit: BoxFit.cover,
                   ),
                 ),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Container(
-                    width: 100,
+                    width: 80,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
-                        Text(vet.nome,style: TextStyle(fontSize: 24, color: Colors.blue[600]),),
+                        SizedBox(height: 15),
+                        Text(vet.nome,style: TextStyle(fontSize: 20, color: Colors.blue[600]),),
                         SizedBox(height: 10),
-                        Text(vet.telefone, style: TextStyle(fontSize: 13, color: Colors.grey)),
+                        Text(vet.especializacao, style: TextStyle(fontSize: 14, color: Colors.grey)),
                       ],
                     ),
                   ),
@@ -56,11 +63,20 @@ class VetCard extends StatelessWidget {
                     itemBuilder: (_) => [
                       PopupMenuItem(
                         child: Text('Editar'),
-                        onTap: (){},
+                        onTap: () => Future(
+                          () => Navigator.of(context).pushNamed(
+                            AppRoutes.VET_FORM,
+                            arguments: vet,
+                          ),
+                        )
                       ),
                       PopupMenuItem(
                         child: Text('Deletar'),
-                        onTap: (){},
+                        onTap: (){
+                          Provider.of<VetList>(
+                            context,
+                            listen: false,).removeVet(vet);
+                        },
                       ),
                     ],
                 ),

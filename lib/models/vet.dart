@@ -6,6 +6,7 @@ class Vet with ChangeNotifier {
   final String telefone;
   final String email;
   final String imagem;
+  final String especializacao;
 
   Vet({
     required this.id,
@@ -13,6 +14,7 @@ class Vet with ChangeNotifier {
     required this.telefone,
     required this.email,
     required this.imagem,
+    required this.especializacao
   });
 
 }

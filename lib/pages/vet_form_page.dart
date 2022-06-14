@@ -13,6 +13,7 @@ class VetFormPage extends StatefulWidget {
 class _VetFormPageState extends State<VetFormPage> {
   final _telefoneFocus = FocusNode();
   final _emailFocus = FocusNode();
+  final _especializacaoFocus = FocusNode();
 
   final _imageUrlFocus = FocusNode();
   final _imageUrlController = TextEditingController();
@@ -39,7 +40,8 @@ class _VetFormPageState extends State<VetFormPage> {
         _formData['nome'] = vet.nome;
         _formData['telefone'] = vet.telefone;
         _formData['email'] = vet.email;
-        _formData['imageUrl'] = vet.imagem;
+        _formData['especializacao'] = vet.especializacao;
+        _formData['imagem'] = vet.imagem;
 
         _imageUrlController.text = vet.imagem;
       }
@@ -51,6 +53,7 @@ class _VetFormPageState extends State<VetFormPage> {
     super.dispose();
     _emailFocus.dispose();
     _telefoneFocus.dispose();
+    _especializacaoFocus.dispose();
 
     _imageUrlFocus.removeListener(updateImage);
     _imageUrlFocus.dispose();
@@ -126,7 +129,7 @@ class _VetFormPageState extends State<VetFormPage> {
                 controller: _imageUrlController,
                 onFieldSubmitted: (_) => _submitForm(),
                 onSaved: (imageUrl) =>
-                    _formData['imageUrl'] = imageUrl ?? '',
+                    _formData['imagem'] = imageUrl ?? '',
                 validator: (_imageUrl) {
                   final imageUrl = _imageUrl ?? '';
                   if (!isValidImageUrl(imageUrl)) {
@@ -142,7 +145,7 @@ class _VetFormPageState extends State<VetFormPage> {
                 ),
                 textInputAction: TextInputAction.next,
                 onFieldSubmitted: (_) {
-                  FocusScope.of(context).requestFocus(_telefoneFocus);
+                  FocusScope.of(context).requestFocus(_especializacaoFocus);
                 },
                 onSaved: (name) => _formData['name'] = name ?? '',
                 validator: (_name) {
@@ -152,6 +155,24 @@ class _VetFormPageState extends State<VetFormPage> {
                   }
                   if (name.trim().length < 3) {
                     return 'Nome precisa no mínimo de 3 letras.';
+                  }
+                  return null;
+                },
+              ),
+              TextFormField(
+                initialValue: _formData['especializacao']?.toString(),
+                decoration: InputDecoration(
+                  labelText: 'Especialização',
+                ),
+                textInputAction: TextInputAction.next,
+                onFieldSubmitted: (_) {
+                  FocusScope.of(context).requestFocus(_telefoneFocus);
+                },
+                onSaved: (especializacao) => _formData['especializacao'] = especializacao ?? '',
+                validator: (_especializacao) {
+                  final especializacao = _especializacao ?? '';
+                  if (especializacao.trim().isEmpty) {
+                    return 'Especialização é obrigatória';
                   }
                   return null;
                 },

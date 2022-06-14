@@ -23,7 +23,7 @@ class PetList with ChangeNotifier {
       nome: data['nome'] as String,
       especie: data['especie'] as String,
       sexo: data['sexo'] as String,
-      idade: data['idade'] as int,
+      idade: data['idade'] as String,
       imageUrl: data['imageUrl'] as String,
     );
 
@@ -44,7 +44,7 @@ class PetList with ChangeNotifier {
           "sexo": pet.sexo,
         }));
     return future.then((response) {
-      final id = jsonDecode(response.body)['nome'];
+      final id = jsonDecode(response.body)['name'];
 
       _pets.add(Pet(
           id: id,
@@ -73,6 +73,18 @@ class PetList with ChangeNotifier {
       if (index >= 0) {
       _pets[index] = pet;
       notifyListeners();
+      }
+    });
+  }
+
+  Future<void> removePet(Pet pet) {
+    final future = http.delete(Uri.parse('$_baseUrl/pets/${pet.id}.json'));
+    int index = _pets.indexWhere((p) => p.id == pet.id);
+
+    return future.then((response) {
+      if (index >= 0) {
+        _pets.removeWhere((p) => p.id == pet.id);
+        notifyListeners();
       }
     });
   }

@@ -7,6 +7,7 @@ final dummyVets = [
     telefone:"(84) 99956-9978",
     email: "jessica@gmail.com",
     imagem: "https://blog.unyleya.edu.br/wp-content/uploads/2019/10/GettyImages-885571364-1.jpg",
+    especializacao: "Nutriçao Animal"
   ),
   Vet(
     id: "2",
@@ -14,6 +15,7 @@ final dummyVets = [
     telefone:"(84) 99956-9978",
     email: "jessica@gmail.com",
     imagem: "https://blog.unyleya.edu.br/wp-content/uploads/2019/10/GettyImages-885571364-1.jpg",
+    especializacao: "Nutriçao Animal"
   ),
   Vet(
     id: "3",
@@ -21,5 +23,6 @@ final dummyVets = [
     telefone:"(84) 99956-9978",
     email: "jessica@gmail.com",
     imagem: "https://blog.unyleya.edu.br/wp-content/uploads/2019/10/GettyImages-885571364-1.jpg",
+    especializacao: "Nutriçao Animal"
   ),
 ];
