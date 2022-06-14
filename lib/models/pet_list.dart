@@ -10,11 +10,31 @@ class PetList with ChangeNotifier {
   final _baseUrl = 'https://pet-shop-app-cced7-default-rtdb.firebaseio.com/';
 
   List<Pet> _pets = dummyPets;
-
+  
   List<Pet> get pets {
     return [..._pets];
   }
-
+  
+  Future<void> getPets() {
+    final future = http.get(Uri.parse('$_baseUrl/pets.json'));
+    return future.then((response) {
+      final data = jsonDecode(response.body) as Map<String, dynamic>; 
+        data.forEach((id, pet) {
+          _pets.add( 
+            Pet( 
+              id: pet['id'] as String,
+              nome: pet['nome'] as String,
+              especie: pet['especie'] as String,
+              sexo: pet['sexo'] as String,
+              idade: pet['idade'] as String,
+              imageUrl: pet['imageUrl'] as String,
+            ), 
+          ); 
+        });
+      notifyListeners();
+    });
+  }
+  
   Future<void> savePet(Map<String, Object> data) {
     bool hasId = data['id'] != null;
 

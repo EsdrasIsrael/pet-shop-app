@@ -21,8 +21,8 @@ class _PetFormPageState extends State<PetFormPage> {
   final _formKey = GlobalKey<FormState>();
   final _formData = Map<String, Object>();
 
-  String selectedValue = "1";
-  String selectedValue2 = "1";
+  String selectedValue = "Macho";
+  String selectedValue2 = "Cachorro";
 
   @override
   void initState() {
@@ -122,24 +122,7 @@ class _PetFormPageState extends State<PetFormPage> {
                   image: DecorationImage(image: NetworkImage(_imageUrlController.text),) 
                 ),
                 alignment: Alignment.center,
-                
-              ),
-              TextFormField(
-                decoration: InputDecoration(labelText: 'Url da Imagem'),
-                keyboardType: TextInputType.url,
-                textInputAction: TextInputAction.done,
-                focusNode: _imageUrlFocus,
-                controller: _imageUrlController,
-                onFieldSubmitted: (_) => _submitForm(),
-                onSaved: (imageUrl) =>
-                    _formData['imageUrl'] = imageUrl ?? '',
-                validator: (_imageUrl) {
-                  final imageUrl = _imageUrl ?? '';
-                  if (!isValidImageUrl(imageUrl)) {
-                    return 'Informe uma Url válida!';
-                  }
-                  return null;
-                },
+
               ),
               TextFormField(
                 initialValue: _formData['nome']?.toString(),
@@ -150,7 +133,7 @@ class _PetFormPageState extends State<PetFormPage> {
                 onFieldSubmitted: (_) {
                   FocusScope.of(context).requestFocus(_especieFocus);
                 },
-                onSaved: (name) => _formData['name'] = name ?? '',
+                onSaved: (name) => _formData['nome'] = name ?? '',
                 validator: (_name) {
                   final name = _name ?? '';
                   if (name.trim().isEmpty) {
@@ -164,6 +147,9 @@ class _PetFormPageState extends State<PetFormPage> {
               ),
               DropdownButtonFormField<String>(
                     dropdownColor: Colors.blue[400],
+                    focusNode: _especieFocus,
+                    onSaved: (especie) =>
+                      _formData['especie'] = especie ?? '',
                     style: const TextStyle(color: Colors.black87, fontSize: 14.5),
                     decoration: const InputDecoration(
                         focusedBorder: UnderlineInputBorder(
@@ -178,7 +164,7 @@ class _PetFormPageState extends State<PetFormPage> {
                         ),
                         filled: false,
                     ),
-                    value: selectedValue2,
+                    value: _formData.isEmpty ? selectedValue2 : _formData['especie']?.toString(),
                     onChanged: (String? newValue){
                       setState(() {
                         selectedValue2 = newValue!;
@@ -187,21 +173,22 @@ class _PetFormPageState extends State<PetFormPage> {
                     items: <DropdownMenuItem<String>>[
                       new DropdownMenuItem(
                         child: new Text('Cachorro'),
-                        value: "1",
+                        value: "Cachorro",
                       ),
                       new DropdownMenuItem(
                         child: new Text('Gato'),
-                        value: "2",
+                        value: "Gato",
                       ),
                       new DropdownMenuItem(
                         child: new Text('Ave'),
-                        value: "3",
+                        value: "Ave",
                       ),
                     ],
               ),
 
               TextFormField(
                 initialValue: _formData['idade']?.toString(),
+                focusNode: _idadeFocus,
                 decoration: InputDecoration(
                   labelText: 'Idade',
                 ),
@@ -223,6 +210,9 @@ class _PetFormPageState extends State<PetFormPage> {
               ),
               DropdownButtonFormField(
                     dropdownColor: Colors.blue[400],
+                    focusNode: _sexoFocus,
+                    onSaved: (sexo) =>
+                      _formData['sexo'] = sexo ?? '',
                     style: const TextStyle(color: Colors.black87, fontSize: 14.5),
                     decoration: const InputDecoration(
                         focusedBorder: UnderlineInputBorder(
@@ -237,7 +227,7 @@ class _PetFormPageState extends State<PetFormPage> {
                         ),
                         filled: false,
                     ),
-                    value: selectedValue,
+                    value: _formData.isEmpty == null ? selectedValue : _formData['sexo']?.toString(),
                     onChanged: (String? newValue) {
                       setState(() {
                         selectedValue = newValue!;
@@ -246,13 +236,29 @@ class _PetFormPageState extends State<PetFormPage> {
                     items: <DropdownMenuItem<String>>[
                       new DropdownMenuItem(
                         child: new Text('Macho'),
-                        value: "1",
+                        value: "Macho",
                       ),
                       new DropdownMenuItem(
                         child: new Text('Fêmea'),
-                        value: "2",
+                        value: "Fêmea",
                       ),
                     ],
+              ),
+              TextFormField(
+                decoration: InputDecoration(labelText: 'Url da Imagem'),
+                keyboardType: TextInputType.url,
+                textInputAction: TextInputAction.done,
+                focusNode: _imageUrlFocus,
+                controller: _imageUrlController,
+                onSaved: (imageUrl) =>
+                    _formData['imageUrl'] = imageUrl ?? '',
+                validator: (_imageUrl) {
+                  final imageUrl = _imageUrl ?? '';
+                  if (!isValidImageUrl(imageUrl)) {
+                    return 'Informe uma Url válida!';
+                  }
+                  return null;
+                },
               ),
             ],
           ),

@@ -216,6 +216,23 @@ class _VetFormPageState extends State<VetFormPage> {
                   return null;
                 },
               ),
+              TextFormField(
+                decoration: InputDecoration(labelText: 'Url da Imagem'),
+                keyboardType: TextInputType.url,
+                textInputAction: TextInputAction.done,
+                focusNode: _imageUrlFocus,
+                controller: _imageUrlController,
+                onFieldSubmitted: (_) => _submitForm(),
+                onSaved: (imageUrl) =>
+                    _formData['imagem'] = imageUrl ?? '',
+                validator: (_imageUrl) {
+                  final imageUrl = _imageUrl ?? '';
+                  if (!isValidImageUrl(imageUrl)) {
+                    return 'Informe uma Url válida!';
+                  }
+                  return null;
+                },
+              ),
             ],
           ),
         ),

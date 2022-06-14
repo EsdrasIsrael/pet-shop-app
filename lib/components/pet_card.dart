@@ -51,6 +51,7 @@ class PetCard extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
                         Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(pet.nome,style: TextStyle(fontSize: 20, color: Colors.blue[600]),),
                             Text("${pet.idade} anos", style: TextStyle(fontSize: 14, color: Colors.grey)),
