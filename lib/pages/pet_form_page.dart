@@ -227,7 +227,7 @@ class _PetFormPageState extends State<PetFormPage> {
                         ),
                         filled: false,
                     ),
-                    value: _formData.isEmpty == null ? selectedValue : _formData['sexo']?.toString(),
+                    value: _formData.isEmpty ? selectedValue : _formData['sexo']?.toString(),
                     onChanged: (String? newValue) {
                       setState(() {
                         selectedValue = newValue!;
