@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:pet_shop_app/models/pet.dart';
 import 'package:pet_shop_app/models/pet_list.dart';
@@ -35,11 +37,15 @@ class PetCard extends StatelessWidget {
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.circular(16.0),
-                  child: Image.network(
-                        pet.imageUrl,
-                        height: 170,
-                        width: 150,
+                  child: Container(
+                    width: 170,
+                    height: 170,
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
                         fit: BoxFit.cover,
+                        image: FileImage(File(pet.imagem.path)),
+                      ),
+                    ),
                   ),
                 ),
                 Padding(

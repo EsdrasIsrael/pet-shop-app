@@ -1,7 +1,10 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
-import 'package:pet_shop_app/models/pet.dart';
 import 'package:pet_shop_app/models/pet_list.dart';
+import 'package:pet_shop_app/models/vet_list.dart';
 import 'package:provider/provider.dart';
+import 'package:image_picker/image_picker.dart';
 
 class PetFormPage extends StatefulWidget {
   const PetFormPage({Key? key}) : super(key: key);
@@ -11,259 +14,172 @@ class PetFormPage extends StatefulWidget {
 }
 
 class _PetFormPageState extends State<PetFormPage> {
-  final _especieFocus = FocusNode();
-  final _idadeFocus = FocusNode();
-  final _sexoFocus = FocusNode();
+  
+  final ImagePicker _picker = ImagePicker();
+  
+  File? _imageFile;
 
-  final _imageUrlFocus = FocusNode();
-  final _imageUrlController = TextEditingController();
-
-  final _formKey = GlobalKey<FormState>();
-  final _formData = Map<String, Object>();
-
-  String selectedValue = "Macho";
-  String selectedValue2 = "Cachorro";
+  TextEditingController _nomeController = TextEditingController();
+  TextEditingController _idadeController = TextEditingController();
+  TextEditingController _especieController = TextEditingController();
+  TextEditingController _sexoController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    _imageUrlFocus.addListener(updateImage);
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-
-    if (_formData.isEmpty) {
-      final arg = ModalRoute.of(context)?.settings.arguments;
-
-      if (arg != null) {
-        final pet = arg as Pet;
-        _formData['id'] = pet.id;
-        _formData['nome'] = pet.nome;
-        _formData['idade'] = pet.idade;
-        _formData['especie'] = pet.especie;
-        _formData['sexo'] = pet.sexo;
-        _formData['imageUrl'] = pet.imageUrl;
-
-        _imageUrlController.text = pet.imageUrl;
-      }
-    }
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    _especieFocus.dispose();
-    _idadeFocus.dispose();
-    _sexoFocus.dispose();
-
-    _imageUrlFocus.removeListener(updateImage);
-    _imageUrlFocus.dispose();
-  }
-
-  void updateImage() {
-    setState(() {});
-  }
-
-  bool isValidImageUrl(String url) {
-    bool isValidUrl = Uri.tryParse(url)?.hasAbsolutePath ?? false;
-    bool endsWithFile = url.toLowerCase().endsWith('.png') ||
-        url.toLowerCase().endsWith('.jpg') ||
-        url.toLowerCase().endsWith('.jpeg');
-    return isValidUrl && endsWithFile;
   }
 
   void _submitForm() {
-    final isValid = _formKey.currentState?.validate() ?? false;
-
-    if (!isValid) {
+    if (_nomeController.text.isEmpty || 
+    _idadeController.text.isEmpty || 
+    _especieController.text.isEmpty ||
+    _sexoController.text.isEmpty ||
+    _imageFile == null) {
       return;
     }
+    
+    Provider.of<PetList>(context, listen: false)
+        .addPet(_nomeController.text,
+                _idadeController.text,
+                _especieController.text,  
+                _imageFile!, 
+                _sexoController.text,);
 
-    _formKey.currentState?.save();
-
-    Provider.of<PetList>(
-      context,
-      listen: false,
-    ).savePet(_formData).then((value) {
-      Navigator.of(context).pop();
-    });
+    Navigator.of(context).pop();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Cadastrar Pet'),
+        title: const Text('Cadastrar Pet'),
         actions: [
           IconButton(
             onPressed: _submitForm,
-            icon: Icon(Icons.check_rounded),
+            icon: const Icon(Icons.check_rounded),
           ),
         ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
-        child: Form(
-          key: _formKey,
-          child: ListView(
-            children: [
-              Container(
-                height: 150,
-                width: 150,
-                margin: const EdgeInsets.only(
-                  top: 10,
-                  left: 10,
-                ),
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.blue,
-                  image: DecorationImage(image: NetworkImage(_imageUrlController.text),) 
-                ),
-                alignment: Alignment.center,
-
+        child: ListView(
+          children: [
+            imageProfile(),
+            const SizedBox(height: 10),
+            TextField(
+              controller: _nomeController,
+              decoration: const InputDecoration(
+              labelText: 'Nome',
               ),
-              TextFormField(
-                initialValue: _formData['nome']?.toString(),
-                decoration: InputDecoration(
-                  labelText: 'Nome',
-                ),
-                textInputAction: TextInputAction.next,
-                onFieldSubmitted: (_) {
-                  FocusScope.of(context).requestFocus(_especieFocus);
-                },
-                onSaved: (name) => _formData['nome'] = name ?? '',
-                validator: (_name) {
-                  final name = _name ?? '';
-                  if (name.trim().isEmpty) {
-                    return 'Nome é obrigatório';
-                  }
-                  if (name.trim().length < 3) {
-                    return 'Nome precisa no mínimo de 3 letras.';
-                  }
-                  return null;
-                },
+            ),
+            const SizedBox(height: 10),
+            TextField(
+              controller: _idadeController,
+              decoration: const InputDecoration(
+              labelText: 'Idade',
               ),
-              DropdownButtonFormField<String>(
-                    dropdownColor: Colors.blue[400],
-                    focusNode: _especieFocus,
-                    onSaved: (especie) =>
-                      _formData['especie'] = especie ?? '',
-                    style: const TextStyle(color: Colors.black87, fontSize: 14.5),
-                    decoration: const InputDecoration(
-                        focusedBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(
-                            color: Colors.grey,
-                          ),
-                        ),
-                        enabledBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(
-                            color: Colors.grey,
-                          ),
-                        ),
-                        filled: false,
-                    ),
-                    value: _formData.isEmpty ? selectedValue2 : _formData['especie']?.toString(),
-                    onChanged: (String? newValue){
-                      setState(() {
-                        selectedValue2 = newValue!;
-                      });
-                    },
-                    items: <DropdownMenuItem<String>>[
-                      new DropdownMenuItem(
-                        child: new Text('Cachorro'),
-                        value: "Cachorro",
-                      ),
-                      new DropdownMenuItem(
-                        child: new Text('Gato'),
-                        value: "Gato",
-                      ),
-                      new DropdownMenuItem(
-                        child: new Text('Ave'),
-                        value: "Ave",
-                      ),
-                    ],
+            ),
+            const SizedBox(height: 10),
+            TextField(
+              controller: _especieController,
+              decoration: const InputDecoration(
+              labelText: 'Especie',
               ),
-
-              TextFormField(
-                initialValue: _formData['idade']?.toString(),
-                focusNode: _idadeFocus,
-                decoration: InputDecoration(
-                  labelText: 'Idade',
-                ),
-                keyboardType: TextInputType.numberWithOptions(
-                  decimal: true,
-                ),
-                textInputAction: TextInputAction.next,
-                onFieldSubmitted: (_) {
-                  FocusScope.of(context).requestFocus(_especieFocus);
-                },
-                onSaved: (idade) => _formData['idade'] = idade ?? '',
-                validator: (_idade) {
-                  final idade = _idade ?? '';
-                  if (idade.trim().isEmpty) {
-                    return 'Idade é obrigatória';
-                  }
-                  return null;
-                },
+            ),
+            const SizedBox(height: 10),
+            TextField(
+              controller: _sexoController,
+              decoration: const InputDecoration(
+              labelText: 'Sexo',
               ),
-              DropdownButtonFormField(
-                    dropdownColor: Colors.blue[400],
-                    focusNode: _sexoFocus,
-                    onSaved: (sexo) =>
-                      _formData['sexo'] = sexo ?? '',
-                    style: const TextStyle(color: Colors.black87, fontSize: 14.5),
-                    decoration: const InputDecoration(
-                        focusedBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(
-                            color: Colors.grey,
-                          ),
-                        ),
-                        enabledBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(
-                            color: Colors.grey,
-                          ),
-                        ),
-                        filled: false,
-                    ),
-                    value: _formData.isEmpty ? selectedValue : _formData['sexo']?.toString(),
-                    onChanged: (String? newValue) {
-                      setState(() {
-                        selectedValue = newValue!;
-                      });
-                    },
-                    items: <DropdownMenuItem<String>>[
-                      new DropdownMenuItem(
-                        child: new Text('Macho'),
-                        value: "Macho",
-                      ),
-                      new DropdownMenuItem(
-                        child: new Text('Fêmea'),
-                        value: "Fêmea",
-                      ),
-                    ],
-              ),
-              TextFormField(
-                decoration: InputDecoration(labelText: 'Url da Imagem'),
-                keyboardType: TextInputType.url,
-                textInputAction: TextInputAction.done,
-                focusNode: _imageUrlFocus,
-                controller: _imageUrlController,
-                onSaved: (imageUrl) =>
-                    _formData['imageUrl'] = imageUrl ?? '',
-                validator: (_imageUrl) {
-                  final imageUrl = _imageUrl ?? '';
-                  if (!isValidImageUrl(imageUrl)) {
-                    return 'Informe uma Url válida!';
-                  }
-                  return null;
-                },
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
+  }
+
+  Widget imageProfile() {
+    return Center(
+      child: Stack(children: <Widget>[
+        CircleAvatar(
+          radius: 80.0,
+          backgroundImage: _imageFile != null
+                ? FileImage(File(_imageFile!.path))
+                : null,
+        ),
+        Positioned(
+          bottom: 20.0,
+          right: 20.0,
+          child: InkWell(
+            onTap: () {
+              showModalBottomSheet(
+                context: context,
+                builder: ((builder) => bottomSheet()),
+              );
+            },
+            child: Container(
+              width: 110,
+              child: const Icon(
+                Icons.camera_alt_rounded,
+                color: Colors.white,
+                size: 32.0,
+              ),
+            ),
+          ),
+        ),
+      ]),
+    );
+  }
+
+  Widget bottomSheet() {
+    return Container(
+      height: 100.0,
+      width: MediaQuery.of(context).size.width,
+      margin: const EdgeInsets.symmetric(
+        horizontal: 20,
+        vertical: 20,
+      ),
+      child: Column(
+        children: <Widget>[
+          const Text(
+            "Definir imagem",
+            style: TextStyle(
+              fontSize: 20.0,
+            ),
+          ),
+          const SizedBox(
+            height: 20,
+          ),
+          Row(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
+            IconButton(
+              icon: const Icon(Icons.camera),
+              onPressed: () {
+                takePhoto(ImageSource.camera);
+              },
+            ),
+            IconButton(
+              icon: Icon(Icons.image),
+              onPressed: () {
+                takePhoto(ImageSource.gallery);
+              },
+            ),
+          ])
+        ],
+      ),
+    );
+  }
+
+  void takePhoto(ImageSource source) async {
+    XFile imageFile = await _picker.pickImage(
+      source: source,
+    ) as XFile;
+
+    if (imageFile == null) return;
+
+    setState(() {
+      _imageFile = File(imageFile.path);
+    });
+    Navigator.pop(context);
   }
 }

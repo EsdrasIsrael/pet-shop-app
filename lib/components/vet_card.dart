@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:pet_shop_app/models/vet.dart';
 import 'package:pet_shop_app/models/vet_list.dart';
@@ -35,12 +37,16 @@ class VetCard extends StatelessWidget {
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.circular(16.0),
-                  child: Image.network(
-                        vet.imagem,
-                        height: 170,
-                        width: 150,
+                  child: Container(
+                    width: 170,
+                    height: 170,
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
                         fit: BoxFit.cover,
-                  ),
+                        image: FileImage(File(vet.imagem.path)),
+                      ),
+                    ),
+                  )
                 ),
                 Padding(
                   padding: const EdgeInsets.all(8.0),

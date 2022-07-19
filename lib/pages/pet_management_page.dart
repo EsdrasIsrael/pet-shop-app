@@ -15,27 +15,41 @@ class PetManagementPage extends StatefulWidget {
 class _PetManagementPageState extends State<PetManagementPage> {
   @override
   Widget build(BuildContext context) {
-
-    final provider = Provider.of<PetList>(context);
-    final List<Pet> petsCadastrados = provider.pets;
     
     return Scaffold(
       appBar: AppBar(
         title: Center(child: Text('Gerenciar pets')),
         ),
-      body: GridView.builder(
-              padding: const EdgeInsets.all(10),
-              itemCount: petsCadastrados.length,
-              itemBuilder: (ctx, i) => ChangeNotifierProvider.value(
-                value: petsCadastrados[i],
-                child: PetCard(),
-              ),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 1, //2 produtos por linha
-                childAspectRatio: 3 / 1.5, //diemnsao de cada elemento
-                crossAxisSpacing: 10,
-                mainAxisSpacing: 10,
-              ),
+      body: FutureBuilder(
+        future: Provider.of<PetList>(context, listen: false).loadPets(),
+        builder: (ctx, snapshot) => snapshot.connectionState ==
+                ConnectionState.waiting
+            ? Center(child: CircularProgressIndicator())
+            : Consumer<PetList>(
+                child: Center(
+                  child: Column(children: [
+                    Text('Nenhum pet cadastrado', style: TextStyle(fontSize: 18),),
+                    Text('Cadastre um pet ao petshop', style: TextStyle(color: Colors.grey)),
+                    Image.asset(
+                      "assets/pets.png",
+                      height: 125.0,
+                      width: 125.0,
+                    )
+                  ],),
+                ),
+                builder: (context, petList, child) =>
+                    petList.petsCount == 0
+                        ? child!
+                        : ListView.builder(
+                            shrinkWrap: true,
+                            scrollDirection: Axis.vertical,
+                            itemCount: petList.petsCount,
+                            itemBuilder: (ctx, i) => ChangeNotifierProvider.value(
+                              value: petList.petByIndex(i),
+                              child: PetCard(),
+                          ),
+                        ),
+                )
       ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.blue[400],

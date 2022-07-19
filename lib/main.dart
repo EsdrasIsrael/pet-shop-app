@@ -1,18 +1,30 @@
 import 'package:flutter/material.dart';
+import 'package:pet_shop_app/firebase_options.dart';
 import 'package:pet_shop_app/models/pet_list.dart';
 import 'package:pet_shop_app/models/vet_list.dart';
-import 'package:pet_shop_app/pages/pet_detail_page.dart';
-import 'package:pet_shop_app/pages/pet_form_page.dart';
 import 'package:pet_shop_app/pages/pet_management_page.dart';
 import 'package:pet_shop_app/pages/pet_shop_main_page.dart';
-import 'package:pet_shop_app/pages/vet_detail_page.dart';
-import 'package:pet_shop_app/pages/vet_form_page.dart';
 import 'package:pet_shop_app/pages/vet_management_page.dart';
-import 'package:pet_shop_app/utils/app_routes.dart';
+import 'package:pet_shop_app/services/firebase_mensaging_services.dart';
+import 'package:pet_shop_app/services/flutter_notifications.dart';
+import 'package:pet_shop_app/utils/routes.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 
-void main() {
-  runApp(const MyApp());
+void main() async{
+
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+  name: 'pet-shop',
+  options: DefaultFirebaseOptions.currentPlatform,
+  ).whenComplete(() {
+    print("completedAppInitialize");
+  });
+
+  runApp(MyApp());
+
+  
 }
 
 class MyApp extends StatefulWidget {
@@ -23,7 +35,23 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-   Widget bottoNavigator() => BottomNavigationBar(
+
+  @override
+  void initState() {
+    super.initState();
+    initilizeFirebaseMessaging();
+    checkNotifications();
+  }
+
+  initilizeFirebaseMessaging() async {
+    await Provider.of<FirebaseMessagingService>(context, listen: false).initialize();
+  }
+
+  checkNotifications() async {
+    await Provider.of<NotificationService>(context, listen: false).checkForNotifications();
+  }
+
+  Widget bottoNavigator() => BottomNavigationBar(
 				currentIndex: _indiceAtual,
         onTap: onTabTapped,
         items: [
@@ -62,9 +90,12 @@ class _MyAppState extends State<MyApp> {
        providers: [
         ChangeNotifierProvider<PetList>(create: (_) => PetList()),
         ChangeNotifierProvider<VetList>(create: (_) => VetList()),
+        Provider<FirebaseMessagingService>(
+          create: (context) => FirebaseMessagingService(context.read<NotificationService>()),
+        ),
       ],
       child: MaterialApp(
-        title: 'Minha Loja',
+        title: 'Pet Shop',
         theme: ThemeData(
             fontFamily: 'Lato',
             //primarySwatch: Colors.pink,
@@ -74,16 +105,9 @@ class _MyAppState extends State<MyApp> {
           bottomNavigationBar: bottoNavigator(),
           body: _telas[_indiceAtual],
       ),
-        routes: {
-          AppRoutes.PET_DETAIL: (ctx) => PetDetailPage(),
-          AppRoutes.PET_FORM: (context) => PetFormPage(),
-          AppRoutes.PET_MANAGEMENT: (context) => PetManagementPage(),
-          AppRoutes.VET_FORM: (context) => VetFormPage(),
-          AppRoutes.VET_DETAIL: (ctx) => VetDetailPage(),
-          AppRoutes.VET_MANAGEMENT:(context) => VetManagementPage(),
-        },
+        routes: Routes.list,
         debugShowCheckedModeBanner: false,
-      ),
+    ),
     );
   }
 }

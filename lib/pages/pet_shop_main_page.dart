@@ -17,12 +17,6 @@ class PetShopMainPage extends StatefulWidget {
 class _PetShopMainPageState extends State<PetShopMainPage> {
   @override
   Widget build(BuildContext context) {
-
-    final provider = Provider.of<PetList>(context);
-    final List<Pet> petsCadastrados = provider.pets.reversed.toList();
-
-    final provider2 = Provider.of<VetList>(context);
-    final List<Vet> vetsCadastrados = provider2.vets.reversed.toList();
     
     return Scaffold(
       appBar: AppBar(
@@ -44,14 +38,36 @@ class _PetShopMainPageState extends State<PetShopMainPage> {
           ),
           Container(
             height: 170,
-            child: ListView.builder(
-              shrinkWrap: true,
-              scrollDirection: Axis.horizontal,
-              itemCount: 3,
-              itemBuilder: (ctx, i) => ChangeNotifierProvider.value(
-                value: petsCadastrados[i],
-                child: PetCard(),
-            ),
+            child: FutureBuilder(
+              future: Provider.of<PetList>(context, listen: false).loadPets(),
+              builder: (ctx, snapshot) => snapshot.connectionState ==
+                      ConnectionState.waiting
+                  ? Center(child: CircularProgressIndicator())
+                  : Consumer<PetList>(
+                      child: Center(
+                        child: Column(children: [
+                          Text('Nenhum pet cadastrado', style: TextStyle(fontSize: 18),),
+                          Text('Cadastre um pet ao petshop', style: TextStyle(color: Colors.grey)),
+                          Image.asset(
+                            "assets/pets.png",
+                            height: 125.0,
+                            width: 125.0,
+                          )
+                        ],),
+                      ),
+                      builder: (context, petList, child) =>
+                          petList.petsCount == 0
+                              ? child!
+                              : ListView.builder(
+                                  shrinkWrap: true,
+                                  scrollDirection: Axis.horizontal,
+                                  itemCount: petList.petsCount,
+                                  itemBuilder: (ctx, i) => ChangeNotifierProvider.value(
+                                    value: petList.petByIndex(i),
+                                    child: PetCard(),
+                                ),
+                              ),
+                      )
             ),
           ),
           Container(
@@ -69,15 +85,32 @@ class _PetShopMainPageState extends State<PetShopMainPage> {
             ),
           ),
           Container(
-            height: 170,
-            child: ListView.builder(
-              shrinkWrap: true,
-              scrollDirection: Axis.horizontal,
-              itemCount: 3,
-              itemBuilder: (ctx, i) => ChangeNotifierProvider.value(
-                value: vetsCadastrados[i],
-                child: VetCard(),
-            ),
+            height: 150,
+            child: FutureBuilder(
+              future: Provider.of<VetList>(context, listen: false).loadVets(),
+              builder: (ctx, snapshot) => snapshot.connectionState ==
+                      ConnectionState.waiting
+                  ? Center(child: CircularProgressIndicator())
+                  : Consumer<VetList>(
+                      child: Center(
+                        child: Column(children: [
+                          Text('Nenhum veterinário cadastrado', style: TextStyle(fontSize: 18),),
+                          Text('Cadastre um veterinário ao petshop', style: TextStyle(color: Colors.grey)),
+                        ]),
+                      ),
+                      builder: (context, vetList, child) =>
+                          vetList.vetsCount == 0
+                              ? child!
+                              : ListView.builder(
+                                  shrinkWrap: true,
+                                  scrollDirection: Axis.horizontal,
+                                  itemCount: vetList.vetsCount,
+                                  itemBuilder: (ctx, i) => ChangeNotifierProvider.value(
+                                    value: vetList.vetByIndex(i),
+                                    child: VetCard(),
+                                ),
+                              ),
+                      )
             ),
           ),
           ]),

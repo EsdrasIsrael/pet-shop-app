@@ -1,92 +1,76 @@
-
-import 'dart:convert';
+import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
-import 'package:pet_shop_app/data/dummyVet.dart';
 import 'package:pet_shop_app/models/vet.dart';
 import 'package:http/http.dart' as http;
+import 'package:pet_shop_app/utils/db_util.dart';
+import 'package:sqflite/sqlite_api.dart';
 
 class VetList with ChangeNotifier {
   final _baseUrl = 'https://pet-shop-app-cced7-default-rtdb.firebaseio.com/';
 
-  List<Vet> _vets = dummyVets;
+  List<Vet> _vets = [];
 
   List<Vet> get vets {
     return [..._vets];
   }
 
-  Future<void> saveVet(Map<String, Object> data) {
-    bool hasId = data['id'] != null;
-
-    final vet = Vet(
-      id: hasId ? data['id'] as String : Random().nextDouble().toString(),
-      nome: data['name'] as String,
-      telefone: data['telefone'] as String,
-      email: data['email'] as String,
-      imagem: data['imagem'] as String,
-      especializacao: data['especializacao'] as String
-    );
-
-    if (hasId) {
-      return updatePet(vet);
-    } else {
-      return addVet(vet);
-    }
+  int get vetsCount {
+    return _vets.length;
   }
 
-  Future<void> addVet(Vet vet) {
-    final future = http.post(Uri.parse('$_baseUrl/veterinarios.json'),
-        body: jsonEncode({
-          "nome": vet.nome,
-          "telefone": vet.telefone,
-          "email": vet.email,
-          "imagem": vet.imagem,
-          "especializacao": vet.especializacao
-        }));
-    return future.then((response) {
-      final id = jsonDecode(response.body)['name'];
+  Vet vetByIndex(int index) {
+    return _vets[index];
+  }
 
-      _vets.add(Vet(
-          id: id,
-          nome: vet.nome,
-          telefone: vet.telefone,
-          email: vet.email,
-          imagem: vet.imagem,
-          especializacao: vet.especializacao
-      ));
-      notifyListeners();
+  Future<void> loadVets() async {
+    final dataList = await DbUtil.getData('vets');
+    _vets = dataList
+        .map(
+          (item) => Vet(
+            id: item['id'],
+            nome: item['nome'],
+            telefone: item['telefone'],
+            email: item['email'],
+            imagem: File(item['imagem']),
+            especializacao: item['especializacao'],
+          ),
+        )
+        .toList();
+    notifyListeners();
+  }
+
+  void addVet(String nome, String telefone, String email, File imagem, String especializacao) async {
+
+    final newVet = Vet(
+          id: Random().nextInt(10000).toString(),
+          nome: nome,
+          telefone: telefone,
+          email: email,
+          imagem: imagem,
+          especializacao: especializacao
+    );    
+    
+    _vets.add(newVet);
+    DbUtil.insert('vets', {
+      'id': newVet.id,
+      'nome': newVet.nome,
+      'telefone': newVet.telefone,
+      'email': newVet.email,
+      'imagem': newVet.imagem.path,
+      'especializacao': newVet.especializacao,
     });
+    notifyListeners();
   }
 
-  Future<void> updatePet(Vet vet) {
-    final future = http.patch(Uri.parse('$_baseUrl/veterinarios/${vet.id}.json'),
-    body: jsonEncode({
-          "nome": vet.nome,
-          "telefone": vet.telefone,
-          "email": vet.email,
-          "imagem": vet.imagem,
-          "especializacao": vet.especializacao
-        })
-    );
-    return future.then((response) {
-      int index = _vets.indexWhere((p) => p.id == vet.id);
-      if (index >= 0) {
-      _vets[index] = vet;
-      notifyListeners();
-      }
-    });
-  }
-
-  Future<void> removeVet(Vet vet) {
-    final future = http.delete(Uri.parse('$_baseUrl/veterinarios/${vet.id}.json'));
+  void removeVet(Vet vet) {
     int index = _vets.indexWhere((p) => p.id == vet.id);
 
-    return future.then((response) {
-      if (index >= 0) {
-        _vets.removeWhere((p) => p.id == vet.id);
-        notifyListeners();
-      }
-    });
+    if (index >= 0) {
+      _vets.removeWhere((p) => p.id == vet.id);
+      DbUtil.delete('vets', int.parse(vet.id));
+      notifyListeners();
+    }
   }
 }

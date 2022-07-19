@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 
 class Pet with ChangeNotifier {
@@ -5,7 +7,7 @@ class Pet with ChangeNotifier {
   final String nome;
   final String idade;
   final String especie;
-  final String imageUrl;
+  final File imagem;
   final String sexo;
 
   Pet({
@@ -13,7 +15,7 @@ class Pet with ChangeNotifier {
     required this.nome,
     required this.idade,
     required this.especie,
-    required this.imageUrl,
+    required this.imagem,
     required this.sexo,
   });
 

@@ -15,27 +15,36 @@ class VetManagementPage extends StatefulWidget {
 class _VetManagementPageState extends State<VetManagementPage> {
   @override
   Widget build(BuildContext context) {
-
-    final provider = Provider.of<VetList>(context);
-    final List<Vet> veterinarios = provider.vets;
     
     return Scaffold(
       appBar: AppBar(
-        title: Center(child: Text('Gerenciar veterinários')),
+        title: const Center(child: Text('Gerenciar veterinários')),
         ),
-      body: GridView.builder(
-              padding: const EdgeInsets.all(10),
-              itemCount: veterinarios.length,
-              itemBuilder: (ctx, i) => ChangeNotifierProvider.value(
-                value: veterinarios[i],
-                child: VetCard(),
-              ),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 1, //2 produtos por linha
-                childAspectRatio: 3 / 1.5, //diemnsao de cada elemento
-                crossAxisSpacing: 10,
-                mainAxisSpacing: 10,
-              ),
+      body: FutureBuilder(
+        future: Provider.of<VetList>(context, listen: false).loadVets(),
+        builder: (ctx, snapshot) => snapshot.connectionState ==
+                ConnectionState.waiting
+            ? Center(child: CircularProgressIndicator())
+            : Consumer<VetList>(
+                child: Center(
+                  child: Column(children: [
+                    Text('Nenhum veterinário cadastrado', style: TextStyle(fontSize: 18),),
+                    Text('Cadastre um veterinário ao petshop', style: TextStyle(color: Colors.grey)),
+                  ]),
+                ),
+                builder: (context, vetList, child) =>
+                    vetList.vetsCount == 0
+                        ? child!
+                        : ListView.builder(
+                            shrinkWrap: true,
+                            scrollDirection: Axis.vertical,
+                            itemCount: vetList.vetsCount,
+                            itemBuilder: (ctx, i) => ChangeNotifierProvider.value(
+                              value: vetList.vetByIndex(i),
+                              child: VetCard(),
+                          ),
+                        ),
+                )
       ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.blue[400],
@@ -44,7 +53,7 @@ class _VetManagementPageState extends State<VetManagementPage> {
             AppRoutes.VET_FORM,
           );
         }, 
-        child: Icon(Icons.add,)),
+        child: const Icon(Icons.add,)),
     );
   }
 }

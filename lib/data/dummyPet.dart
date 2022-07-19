@@ -1,7 +1,7 @@
 import 'package:pet_shop_app/models/pet.dart';
 
 final dummyPets = [
-  Pet(
+  /* Pet(
   id:"1",
   nome:"Thor",
   idade:"5",
@@ -24,6 +24,6 @@ final dummyPets = [
   especie: "Cachorro",
   imageUrl: "https://emc.acidadeon.com/dbimagens/cachorro_pet_1200x675_01122021094401.jpg", 
   sexo: "Macho",
-  ), 
+  ),  */
 ];
 
